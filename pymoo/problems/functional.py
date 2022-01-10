@@ -1,5 +1,5 @@
 
-import autograd.numpy as np
+import jax.numpy as jnp
 
 from pymoo.core.problem import ElementwiseProblem
 
@@ -41,19 +41,19 @@ class FunctionalProblem(ElementwiseProblem):
     def _evaluate(self, x, out, *args, **kwargs):
 
         # calculate violation from the inequality constraints
-        ieq = np.array([constr(x) for constr in self.constr_ieq])
+        ieq = jnp.array([constr(x) for constr in self.constr_ieq])
         ieq[ieq < 0] = 0
 
         # calculate violation from the quality constraints
-        eq = np.array([constr(x) for constr in self.constr_eq])
-        eq = np.abs(eq)
+        eq = jnp.array([constr(x) for constr in self.constr_eq])
+        eq = jnp.abs(eq)
         eq = eq - self.constr_eq_eps
 
         # calculate the objective function
-        f = np.array([obj(x) for obj in self.objs])
+        f = jnp.array([obj(x) for obj in self.objs])
 
         out["F"] = f
-        out["G"] = np.concatenate([ieq, eq])
+        out["G"] = jnp.concatenate([ieq, eq])
 
     def _calc_pareto_front(self, *args, **kwargs):
         return self.func_pf(*args, **kwargs)

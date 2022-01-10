@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 import numpy as np
 from autograd import value_and_grad
 
@@ -279,9 +279,9 @@ def squared_dist(A, B):
 
 
 def calc_potential_energy(A, d):
-    i, j = anp.triu_indices(len(A), 1)
-    D = anp.sqrt(squared_dist(A, A)[i, j])
-    energy = anp.log((1 / D ** d).mean())
+    i, j = jnp.triu_indices(len(A), 1)
+    D = jnp.sqrt(squared_dist(A, A)[i, j])
+    energy = jnp.log((1 / D ** d).mean())
     return energy
 
 

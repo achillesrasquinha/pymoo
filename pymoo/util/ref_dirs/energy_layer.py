@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 import numpy as np
 from autograd import value_and_grad
 
@@ -102,14 +102,14 @@ def get_points(X, scalings):
     vals = []
     for i in range(len(X)):
         vals.append(scale_reference_directions(X[i], scalings[i]))
-    X = anp.row_stack(vals)
+    X = jnp.row_stack(vals)
     return X
 
 
 def calc_potential_energy(scalings, X):
     X = get_points(X, scalings)
 
-    i, j = anp.triu_indices(len(X), 1)
+    i, j = jnp.triu_indices(len(X), 1)
     D = squared_dist(X, X)[i, j]
 
     if np.any(D < 1e-12):

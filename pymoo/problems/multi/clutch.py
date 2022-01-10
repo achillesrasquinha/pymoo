@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.core.problem import Problem
 
@@ -7,19 +7,19 @@ class Clutch(Problem):
     def __init__(self):
         super().__init__(n_var=5, n_obj=2, n_constr=19, type_var=aint)
         # ri, ro, t, F, Z
-        # self.xl = anp.array([60, 90, 1, 600, 2])
-        self.xl = anp.array([0, 0, 0, 0, 0])
-        self.xu = anp.array([20, 20, 4, 400, 7])
+        # self.xl = jnp.array([60, 90, 1, 600, 2])
+        self.xl = jnp.array([0, 0, 0, 0, 0])
+        self.xu = jnp.array([20, 20, 4, 400, 7])
 
-        self.x1 = anp.arange(60, 81)
-        self.x2 = anp.arange(90, 111)
-        self.x3 = anp.arange(1, 3.5, 0.5)
-        self.x4 = anp.arange(600, 1001)
-        self.x5 = anp.arange(2, 11)
+        self.x1 = jnp.arange(60, 81)
+        self.x2 = jnp.arange(90, 111)
+        self.x3 = jnp.arange(1, 3.5, 0.5)
+        self.x4 = jnp.arange(600, 1001)
+        self.x5 = jnp.arange(2, 11)
 
     def _evaluate(self, x, out, *args, **kwargs):
 
-        x1, x2, x3, x4, x5 = anp.split(x, 5, axis=1)
+        x1, x2, x3, x4, x5 = jnp.split(x, 5, axis=1)
 
         x1 = self.x1[x1]
         x2 = self.x2[x2]
@@ -27,7 +27,7 @@ class Clutch(Problem):
         x4 = self.x4[x4]
         x5 = self.x5[x5]
 
-        pi = anp.pi
+        pi = jnp.pi
         mu = 0.5
         s = 1.5
         M_f = 3  # Nm
@@ -87,13 +87,13 @@ class Clutch(Problem):
         f1 = pi * (x2**2 - x1**2) * x3 * (x5 + 1) * rho
         f2 = T
 
-        out["F"] = anp.column_stack([f1, f2])
-        out["G"] = anp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8])
+        out["F"] = jnp.column_stack([f1, f2])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8])
 
 
 if __name__ == "__main__":
-    x = anp.array([[10, 0, 1, 400, 1]])
-    # x = anp.array([[10, 0, 0, 260, 1]])
+    x = jnp.array([[10, 0, 1, 400, 1]])
+    # x = jnp.array([[10, 0, 0, 260, 1]])
 
     problem = Clutch()
 

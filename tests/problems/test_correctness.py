@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 import pytest
 
 from pymoo.factory import get_problem
@@ -33,23 +33,23 @@ def test_problems(name, params):
     if problem.n_obj == 1:
         F = F[:, None]
 
-    assert anp.all(anp.abs(_F - F) < 0.00001)
+    assert jnp.all(jnp.abs(_F - F) < 0.00001)
 
     if problem.n_constr > 0:
-        assert anp.all(anp.abs(_CV[:, 0] - CV) < 0.0001)
+        assert jnp.all(jnp.abs(_CV[:, 0] - CV) < 0.0001)
 
 
 def load(name, suffix=[]):
     path = path_to_test_resource("problems", *suffix)
 
-    X = anp.loadtxt(os.path.join(path, "%s.x" % name))
+    X = jnp.loadtxt(os.path.join(path, "%s.x" % name))
 
     try:
-        F = anp.loadtxt(os.path.join(path, "%s.f" % name))
+        F = jnp.loadtxt(os.path.join(path, "%s.f" % name))
 
         CV = None
         if os.path.exists(os.path.join(path, "%s.cv" % name)):
-            CV = anp.loadtxt(os.path.join(path, "%s.cv" % name))
+            CV = jnp.loadtxt(os.path.join(path, "%s.cv" % name))
 
     except:
         return X, None, None

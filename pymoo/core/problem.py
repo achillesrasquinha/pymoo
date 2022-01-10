@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-import autograd.numpy as np
+import jax.numpy as np
 
 from pymoo.util.cache import Cache
 from pymoo.util.misc import at_least_2d_array

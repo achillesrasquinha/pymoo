@@ -1,5 +1,5 @@
 import numpy as np
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.core.problem import Problem
 
@@ -18,8 +18,8 @@ class Knapsack(Problem):
         self.C = C
 
     def _evaluate(self, x, out, *args, **kwargs):
-        out["F"] = -anp.sum(self.P * x, axis=1)
-        out["G"] = (anp.sum(self.W * x, axis=1) - self.C)
+        out["F"] = -jnp.sum(self.P * x, axis=1)
+        out["G"] = (jnp.sum(self.W * x, axis=1) - self.C)
 
 
 class MultiObjectiveKnapsack(Knapsack):
@@ -27,18 +27,18 @@ class MultiObjectiveKnapsack(Knapsack):
         super().__init__(*args)
 
     def _evaluate(self, x, out, *args, **kwargs):
-        f1 = - anp.sum(self.P * x, axis=1)
-        f2 = anp.sum(x, axis=1)
+        f1 = - jnp.sum(self.P * x, axis=1)
+        f2 = jnp.sum(x, axis=1)
 
-        out["F"] = anp.column_stack([f1, f2])
-        out["G"] = (anp.sum(self.W * x, axis=1) - self.C)
+        out["F"] = jnp.column_stack([f1, f2])
+        out["G"] = (jnp.sum(self.W * x, axis=1) - self.C)
 
 
 def create_random_knapsack_problem(n_items, seed=1, variant="single"):
-    anp.random.seed(seed)
-    P = anp.random.randint(1, 100, size=n_items)
-    W = anp.random.randint(1, 100, size=n_items)
-    C = int(anp.sum(W) / 10)
+    jnp.random.seed(seed)
+    P = jnp.random.randint(1, 100, size=n_items)
+    W = jnp.random.randint(1, 100, size=n_items)
+    C = int(jnp.sum(W) / 10)
 
     if variant == "single":
         problem = Knapsack(n_items, W, P, C)

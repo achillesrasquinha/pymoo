@@ -1,22 +1,22 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.core.problem import Problem
 from pymoo.util.remote import Remote
 
 
 def g_linear(x):
-    return 1 + anp.sum(x, axis=1)
+    return 1 + jnp.sum(x, axis=1)
 
 
 def g_multimodal(x):
     A = 10
-    return 1 + A * x.shape[1] + anp.sum(x ** 2 - A * anp.cos(2 * anp.pi * x), axis=1)
+    return 1 + A * x.shape[1] + jnp.sum(x ** 2 - A * jnp.cos(2 * jnp.pi * x), axis=1)
 
 
 class CTP(Problem):
 
     def __init__(self, n_var=2, n_constr=1, option="linear"):
-        super().__init__(n_var=n_var, n_obj=2, n_constr=n_constr, xl=0, xu=1, type_var=anp.double)
+        super().__init__(n_var=n_var, n_obj=2, n_constr=n_constr, xl=0, xu=1, type_var=jnp.double)
 
         if option == "linear":
             self.calc_g = g_linear
@@ -38,11 +38,11 @@ class CTP(Problem):
     def calc_constraint(self, theta, a, b, c, d, e, f1, f2):
 
         # Equations in readable format
-        exp1 = (f2 - e) * anp.cos(theta) - f1 * anp.sin(theta)
+        exp1 = (f2 - e) * jnp.cos(theta) - f1 * jnp.sin(theta)
 
-        exp2 = (f2 - e) * anp.sin(theta) + f1 * anp.cos(theta)
-        exp2 = b * anp.pi * (exp2 ** c)
-        exp2 = anp.abs(anp.sin(exp2))
+        exp2 = (f2 - e) * jnp.sin(theta) + f1 * jnp.cos(theta)
+        exp2 = b * jnp.pi * (exp2 ** c)
+        exp2 = jnp.abs(jnp.sin(exp2))
         exp2 = a * (exp2 ** d)
 
         # as in the paper
@@ -52,8 +52,8 @@ class CTP(Problem):
         val = 1 - exp1 / exp2
 
         # ONE EQUATION
-        # _val = - (anp.cos(theta) * (f2 - e) - anp.sin(theta) * f1 -
-        #           a * anp.abs(anp.sin(b * anp.pi * (anp.sin(theta) * (f2 - e) + anp.cos(theta) * f1) ** c)) ** d)
+        # _val = - (jnp.cos(theta) * (f2 - e) - jnp.sin(theta) * f1 -
+        #           a * jnp.abs(jnp.sin(b * jnp.pi * (jnp.sin(theta) * (f2 - e) + jnp.cos(theta) * f1) ** c)) ** d)
 
         return val
 
@@ -66,15 +66,15 @@ class CTP1(CTP):
     def __init__(self, n_var=2, n_constr=2, **kwargs):
         super().__init__(n_var, n_constr, **kwargs)
 
-        a, b = anp.zeros(n_constr + 1), anp.zeros(n_constr + 1)
+        a, b = jnp.zeros(n_constr + 1), jnp.zeros(n_constr + 1)
         a[0], b[0] = 1, 1
         delta = 1 / (n_constr + 1)
         alpha = delta
 
         for j in range(n_constr):
-            beta = a[j] * anp.exp(-b[j] * alpha)
+            beta = a[j] * jnp.exp(-b[j] * alpha)
             a[j + 1] = (a[j] + beta) / 2
-            b[j + 1] = - 1 / alpha * anp.log(beta / a[j + 1])
+            b[j + 1] = - 1 / alpha * jnp.log(beta / a[j + 1])
 
             alpha += delta
 
@@ -84,24 +84,24 @@ class CTP1(CTP):
     def _evaluate(self, x, out, *args, **kwargs):
         f1 = x[:, 0]
         gg = self.calc_g(x[:, 1:])
-        f2 = gg * anp.exp(-f1 / gg)
-        out["F"] = anp.column_stack([f1, f2])
+        f2 = gg * jnp.exp(-f1 / gg)
+        out["F"] = jnp.column_stack([f1, f2])
 
         a, b = self.a, self.b
         g = []
         for j in range(self.n_constr):
-            _g = - (f2 - (a[j] * anp.exp(-b[j] * f1)))
+            _g = - (f2 - (a[j] * jnp.exp(-b[j] * f1)))
             g.append(_g)
-        out["G"] = anp.column_stack(g)
+        out["G"] = jnp.column_stack(g)
 
 
 class CTP2(CTP):
 
     def _evaluate(self, x, out, *args, **kwargs):
         f1, f2 = self.calc_objectives(x)
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
 
-        theta = -0.2 * anp.pi
+        theta = -0.2 * jnp.pi
         a, b, c, d, e = 0.2, 10, 1, 6, 1
         out["G"] = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
 
@@ -110,9 +110,9 @@ class CTP3(CTP):
 
     def _evaluate(self, x, out, *args, **kwargs):
         f1, f2 = self.calc_objectives(x)
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
 
-        theta = -0.2 * anp.pi
+        theta = -0.2 * jnp.pi
         a, b, c, d, e = 0.1, 10, 1, 0.5, 1
 
         out["G"] = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
@@ -122,9 +122,9 @@ class CTP4(CTP):
 
     def _evaluate(self, x, out, *args, **kwargs):
         f1, f2 = self.calc_objectives(x)
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
 
-        theta = -0.2 * anp.pi
+        theta = -0.2 * jnp.pi
         a, b, c, d, e = 0.75, 10, 1, 0.5, 1
 
         out["G"] = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
@@ -134,9 +134,9 @@ class CTP5(CTP):
 
     def _evaluate(self, x, out, *args, **kwargs):
         f1, f2 = self.calc_objectives(x)
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
 
-        theta = -0.2 * anp.pi
+        theta = -0.2 * jnp.pi
         a, b, c, d, e = 0.1, 10, 2, 0.5, 1
 
         out["G"] = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
@@ -146,14 +146,14 @@ class CTP6(CTP):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.xu = anp.full(self.n_var, 20)
+        self.xu = jnp.full(self.n_var, 20)
         self.xu[0] = 1
 
     def _evaluate(self, x, out, *args, **kwargs):
         f1, f2 = self.calc_objectives(x)
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
 
-        theta = 0.1 * anp.pi
+        theta = 0.1 * jnp.pi
         a, b, c, d, e = 40, 0.5, 1, 2, -2
 
         out["G"] = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
@@ -163,9 +163,9 @@ class CTP7(CTP):
 
     def _evaluate(self, x, out, *args, **kwargs):
         f1, f2 = self.calc_objectives(x)
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
 
-        theta = -0.05 * anp.pi
+        theta = -0.05 * jnp.pi
         a, b, c, d, e = 40, 5, 1, 6, 0
 
         out["G"] = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
@@ -174,22 +174,22 @@ class CTP7(CTP):
 class CTP8(CTP):
     def __init__(self, **kwargs):
         super().__init__(n_constr=2, **kwargs)
-        self.xu = anp.full(self.n_var, 20)
+        self.xu = jnp.full(self.n_var, 20)
         self.xu[0] = 1
 
     def _evaluate(self, x, out, *args, **kwargs):
         f1, f2 = self.calc_objectives(x)
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
 
-        theta = 0.1 * anp.pi
+        theta = 0.1 * jnp.pi
         a, b, c, d, e = 40, 0.5, 1, 2, -2
         g1 = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
 
-        theta = -0.05 * anp.pi
+        theta = -0.05 * jnp.pi
         a, b, c, d, e = 40, 2, 1, 6, 0
         g2 = self.calc_constraint(theta, a, b, c, d, e, f1, f2)
 
-        out["G"] = anp.column_stack([g1, g2])
+        out["G"] = jnp.column_stack([g1, g2])
 
 
 if __name__ == '__main__':

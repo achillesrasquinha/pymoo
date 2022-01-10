@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 import numpy as np
 
 from pymoo.core.problem import Problem
@@ -25,7 +25,7 @@ class CantileveredBeam(Problem):
 
         g1 = (sigma - 5000.0) / 5000.0
         g2 = (delta - 0.1) / 0.1
-        out["G"] = anp.column_stack([g1, g2])
+        out["G"] = jnp.column_stack([g1, g2])
 
     def _calc_pareto_front(self):
         return 92.7693

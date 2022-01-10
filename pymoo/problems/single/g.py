@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.core.problem import Problem
 
@@ -11,15 +11,15 @@ class G1(Problem):
         self.n_var = 13
         self.n_constr = 9
         self.n_obj = 1
-        self.xl = anp.zeros(self.n_var, dtype=float)
-        self.xu = anp.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 100, 100, 100, 1], dtype=float)
+        self.xl = jnp.zeros(self.n_var, dtype=float)
+        self.xu = jnp.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 100, 100, 100, 1], dtype=float)
         super(G1, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         x1 = x[:, 0: 4]
         x2 = x[:, 4: 13]
-        f = 5 * anp.sum(x1, axis=1) - 5 * anp.sum(x1 ** 2, axis=1) - anp.sum(x2, axis=1)
+        f = 5 * jnp.sum(x1, axis=1) - 5 * jnp.sum(x1 ** 2, axis=1) - jnp.sum(x2, axis=1)
 
         # Constraints
         g1 = 2 * x[:, 0] + 2 * x[:, 1] + x[:, 9] + x[:, 10] - 10
@@ -33,7 +33,7 @@ class G1(Problem):
         g9 = -2 * x[:, 7] - x[:, 8] + x[:, 11]
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8, g9])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8, g9])
 
     def _calc_pareto_front(self):
         return -15.0
@@ -48,30 +48,30 @@ class G2(Problem):
         self.n_constr = 2
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = anp.zeros(self.n_var)
-        self.xu = 10 * anp.ones(self.n_var)
+        self.xl = jnp.zeros(self.n_var)
+        self.xu = 10 * jnp.ones(self.n_var)
         super(G2, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         l = []
         for j in range(self.n_var):
             l.append((j + 1) * x[:, j] ** 2)
-        sum_jx = anp.sum(anp.column_stack(l), axis=1)
+        sum_jx = jnp.sum(jnp.column_stack(l), axis=1)
 
-        a = anp.sum(anp.cos(x) ** 4, axis=1)
-        b = 2 * anp.prod(anp.cos(x) ** 2, axis=1)
-        c = (anp.sqrt(sum_jx)).flatten()
+        a = jnp.sum(jnp.cos(x) ** 4, axis=1)
+        b = 2 * jnp.prod(jnp.cos(x) ** 2, axis=1)
+        c = (jnp.sqrt(sum_jx)).flatten()
         c = c + (c == 0) * 1e-20
 
-        f = -anp.absolute((a - b) / c)
+        f = -jnp.absolute((a - b) / c)
 
         # Constraints
-        g1 = -anp.prod(x, 1) + 0.75
-        g2 = anp.sum(x, axis=1) - 7.5 * self.n_var
+        g1 = -jnp.prod(x, 1) + 0.75
+        g2 = jnp.sum(x, axis=1) - 7.5 * self.n_var
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2])
+        out["G"] = jnp.column_stack([g1, g2])
 
     def _calc_pareto_front(self):
         return -0.80361910412559
@@ -90,16 +90,16 @@ class G3(Problem):
         self.n_constr = 1
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = anp.zeros(self.n_var)
-        self.xu = anp.ones(self.n_var)
+        self.xl = jnp.zeros(self.n_var)
+        self.xu = jnp.ones(self.n_var)
         super(G3, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
-        f = -anp.sqrt(self.n_var) ** self.n_var * anp.prod(x, axis=1)
+        f = -jnp.sqrt(self.n_var) ** self.n_var * jnp.prod(x, axis=1)
 
         # Constraints
-        g = anp.absolute(anp.sum(x ** 2, axis=1) - 1) - 1e-4
+        g = jnp.absolute(jnp.sum(x ** 2, axis=1) - 1) - 1e-4
 
         out["F"] = f
         out["G"] = g
@@ -120,10 +120,10 @@ class G4(Problem):
         self.n_constr = 6
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = anp.array([78, 33, 27, 27, 27])
-        self.xu = anp.array([102, 45, 45, 45, 45])
+        self.xl = jnp.array([78, 33, 27, 27, 27])
+        self.xu = jnp.array([102, 45, 45, 45, 45])
         super(G4, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         f = 5.3578547 * x[:, 2] ** 2 + 0.8356891 * x[:, 0] * x[:, 4] + 37.293239 * x[:, 0] - 40792.141
@@ -140,7 +140,7 @@ class G4(Problem):
         g6 = w - 25
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2, g3, g4, g5, g6])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4, g5, g6])
 
     def _calc_pareto_front(self):
         return -3.066553867178332 * (10 ** 4)
@@ -156,10 +156,10 @@ class G5(Problem):
         self.n_constr = 5
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = anp.array([0, 0, -0.55, -0.55])
-        self.xu = anp.array([1200, 1200, 0.55, 0.55])
+        self.xl = jnp.array([0, 0, -0.55, -0.55])
+        self.xu = jnp.array([1200, 1200, 0.55, 0.55])
         super(G5, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         f = 3 * x[:, 0] + (10 ** -6) * x[:, 0] ** 3 + 2 * x[:, 1] + (2 * 10 ** (-6)) / 3 * x[:, 1] ** 3
@@ -168,13 +168,13 @@ class G5(Problem):
         g1 = x[:, 2] - x[:, 3] - 0.55
         g2 = x[:, 3] - x[:, 2] - 0.55
 
-        g3 = anp.absolute(1000 * (anp.sin(-x[:, 2] - 0.25) + anp.sin(-x[:, 3] - 0.25)) + 894.8 - x[:, 0]) - 10 ** (-4)
-        g4 = anp.absolute(
-            1000 * (anp.sin(x[:, 2] - 0.25) + anp.sin(x[:, 2] - x[:, 3] - 0.25)) + 894.8 - x[:, 1]) - 10 ** (-4)
-        g5 = anp.absolute(1000 * (anp.sin(x[:, 3] - 0.25) + anp.sin(x[:, 3] - x[:, 2] - 0.25)) + 1294.8) - 10 ** (-4)
+        g3 = jnp.absolute(1000 * (jnp.sin(-x[:, 2] - 0.25) + jnp.sin(-x[:, 3] - 0.25)) + 894.8 - x[:, 0]) - 10 ** (-4)
+        g4 = jnp.absolute(
+            1000 * (jnp.sin(x[:, 2] - 0.25) + jnp.sin(x[:, 2] - x[:, 3] - 0.25)) + 894.8 - x[:, 1]) - 10 ** (-4)
+        g5 = jnp.absolute(1000 * (jnp.sin(x[:, 3] - 0.25) + jnp.sin(x[:, 3] - x[:, 2] - 0.25)) + 1294.8) - 10 ** (-4)
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2, g3, g4, g5])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4, g5])
 
     def _calc_pareto_front(self):
         return 5126.4967140071
@@ -190,10 +190,10 @@ class G6(Problem):
         self.n_constr = 2
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = anp.array([13, 0])
-        self.xu = anp.array([100, 100])
+        self.xl = jnp.array([13, 0])
+        self.xu = jnp.array([100, 100])
         super(G6, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         f = (x[:, 0] - 10) ** 3 + (x[:, 1] - 20) ** 3
@@ -203,13 +203,13 @@ class G6(Problem):
         g2 = (x[:, 0] - 6) ** 2 + (x[:, 1] - 5) ** 2 - 82.81
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2])
+        out["G"] = jnp.column_stack([g1, g2])
 
     def _calc_pareto_front(self):
         return -6961.81387558015
 
     def _calc_pareto_set(self):
-        return anp.array([14.09500000000000064, 0.8429607892154795668])
+        return jnp.array([14.09500000000000064, 0.8429607892154795668])
 
 
 class G7(Problem):
@@ -219,10 +219,10 @@ class G7(Problem):
         self.n_constr = 8
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = -10 * anp.ones(self.n_var)
-        self.xu = 10 * anp.ones(self.n_var)
+        self.xl = -10 * jnp.ones(self.n_var)
+        self.xu = 10 * jnp.ones(self.n_var)
         super(G7, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         f = x[:, 0] ** 2 + x[:, 1] ** 2 + x[:, 0] * x[:, 1] - 14 * x[:, 0] - 16 * x[:, 1] + (x[:, 2] - 10) ** 2 \
@@ -240,7 +240,7 @@ class G7(Problem):
         g8 = -3 * x[:, 0] + 6 * x[:, 1] + 12 * (x[:, 8] - 8) ** 2 - 7 * x[:, 9]
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8])
 
     def _calc_pareto_front(self):
         return 24.30620906818
@@ -258,13 +258,13 @@ class G8(Problem):
         self.n_constr = 2
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = anp.zeros(self.n_var)
-        self.xu = 10 * anp.ones(self.n_var)
+        self.xl = jnp.zeros(self.n_var)
+        self.xu = 10 * jnp.ones(self.n_var)
         super(G8, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
-        f = -(anp.sin(2 * math.pi * x[:, 0]) ** 3 * anp.sin(2 * math.pi * x[:, 1])) / (
+        f = -(jnp.sin(2 * math.pi * x[:, 0]) ** 3 * jnp.sin(2 * math.pi * x[:, 1])) / (
                 x[:, 0] ** 3 * (x[:, 0] + x[:, 1]))
 
         # Constraints
@@ -272,7 +272,7 @@ class G8(Problem):
         g2 = 1 - x[:, 0] + (x[:, 1] - 4) ** 2
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2])
+        out["G"] = jnp.column_stack([g1, g2])
 
     def _calc_pareto_front(self):
         return -0.0958250414180359
@@ -288,10 +288,10 @@ class G9(Problem):
         self.n_constr = 4
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = -10 * anp.zeros(self.n_var)
-        self.xu = 10 * anp.ones(self.n_var)
+        self.xl = -10 * jnp.zeros(self.n_var)
+        self.xu = 10 * jnp.ones(self.n_var)
         super(G9, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                 type_var=anp.double)
+                                 type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         f = (x[:, 0] - 10) ** 2 + 5 * (x[:, 1] - 12) ** 2 + x[:, 2] ** 4 \
@@ -307,7 +307,7 @@ class G9(Problem):
         g4 = 2 * v1 + v2 - 3 * x[:, 0] * x[:, 1] + 2 * x[:, 2] ** 2 + 5. * x[:, 5] - 11 * x[:, 6]
 
         out["F"] = f[:, None]
-        out["G"] = anp.column_stack([g1, g2, g3, g4])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4])
 
     def _calc_pareto_front(self):
         return 680.630057374402
@@ -324,10 +324,10 @@ class G10(Problem):
         self.n_constr = 6
         self.n_obj = 1
         self.func = self._evaluate
-        self.xl = anp.array([100, 1000, 1000, 10, 10, 10, 10, 10])
-        self.xu = anp.array([10000, 10000, 10000, 1000, 1000, 1000, 1000, 1000])
+        self.xl = jnp.array([100, 1000, 1000, 10, 10, 10, 10, 10])
+        self.xu = jnp.array([10000, 10000, 10000, 1000, 1000, 1000, 1000, 1000])
         super(G10, self).__init__(n_var=self.n_var, n_obj=self.n_obj, n_constr=self.n_constr, xl=self.xl, xu=self.xu,
-                                  type_var=anp.double)
+                                  type_var=jnp.double)
 
     def _evaluate(self, x, out, *args, **kwargs):
         f = x[:, 0] + x[:, 1] + x[:, 2]
@@ -341,7 +341,7 @@ class G10(Problem):
         g6 = x[:, 2] * x[:, 4] - x[:, 2] * x[:, 7] - 2500. * x[:, 4] + 1250000
 
         out["F"] = f
-        out["G"] = anp.column_stack([g1, g2, g3, g4, g5, g6])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4, g5, g6])
 
     def _calc_pareto_front(self):
         return 7049.24802052867

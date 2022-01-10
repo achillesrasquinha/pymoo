@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.problems.many.dtlz import DTLZ1, DTLZ2, DTLZ3, DTLZ4
 
@@ -91,21 +91,21 @@ class C3DTLZ4(DTLZ4):
 
     def _calc_pareto_front(self, ref_dirs, *args, **kwargs):
         F = super()._calc_pareto_front(ref_dirs, *args, **kwargs)
-        a = anp.sqrt(anp.sum(F ** 2, 1) - 3 / 4 * anp.max(F ** 2, axis=1))
-        a = anp.expand_dims(a, axis=1)
-        a = anp.tile(a, [1, ref_dirs.shape[1]])
+        a = jnp.sqrt(jnp.sum(F ** 2, 1) - 3 / 4 * jnp.max(F ** 2, axis=1))
+        a = jnp.expand_dims(a, axis=1)
+        a = jnp.tile(a, [1, ref_dirs.shape[1]])
         F = F / a
 
         return F
 
 
 def constraint_c1_linear(f):
-    g = - (1 - f[:, -1] / 0.6 - anp.sum(f[:, :-1] / 0.5, axis=1))
+    g = - (1 - f[:, -1] / 0.6 - jnp.sum(f[:, :-1] / 0.5, axis=1))
     return g
 
 
 def constraint_c1_spherical(f, r):
-    radius = anp.sum(f ** 2, axis=1)
+    radius = jnp.sum(f ** 2, axis=1)
     g = - (radius - 16) * (radius - r ** 2)
 
     return g
@@ -114,15 +114,15 @@ def constraint_c1_spherical(f, r):
 def constraint_c2(f, r):
     n_obj = f.shape[1]
 
-    v1 = anp.inf * anp.ones(f.shape[0])
+    v1 = jnp.inf * jnp.ones(f.shape[0])
 
     for i in range(n_obj):
-        temp = (f[:, i] - 1) ** 2 + (anp.sum(f ** 2, axis=1) - f[:, i] ** 2) - r ** 2
-        v1 = anp.minimum(temp.flatten(), v1)
+        temp = (f[:, i] - 1) ** 2 + (jnp.sum(f ** 2, axis=1) - f[:, i] ** 2) - r ** 2
+        v1 = jnp.minimum(temp.flatten(), v1)
 
-    a = 1 / anp.sqrt(n_obj)
-    v2 = anp.sum((f - a) ** 2, axis=1) - r ** 2
-    g = anp.minimum(v1, v2.flatten())
+    a = 1 / jnp.sqrt(n_obj)
+    v2 = jnp.sum((f - a) ** 2, axis=1) - r ** 2
+    g = jnp.minimum(v1, v2.flatten())
 
     return g
 
@@ -132,10 +132,10 @@ def constraint_c3_linear(f):  # M lines
     g = []
 
     for i in range(n_obj):
-        _g = 1 - f[:, i] / 0.5 - (anp.sum(f, axis=1) - f[:, i])
+        _g = 1 - f[:, i] / 0.5 - (jnp.sum(f, axis=1) - f[:, i])
         g.append(_g)
 
-    return anp.column_stack(g)
+    return jnp.column_stack(g)
 
 
 def constraint_c3_spherical(f):  # M ellipse
@@ -143,13 +143,13 @@ def constraint_c3_spherical(f):  # M ellipse
     g = []
 
     for i in range(n_obj):
-        _g = 1 - f[:, i] ** 2 / 4 - (anp.sum(f ** 2, axis=1) - f[:, i] ** 2)
+        _g = 1 - f[:, i] ** 2 / 4 - (jnp.sum(f ** 2, axis=1) - f[:, i] ** 2)
         g.append(_g)
-    return anp.column_stack(g)
+    return jnp.column_stack(g)
 
 
 def constraint_c4_cylindrical(f, r):  # cylindrical
-    l = anp.mean(f, axis=1)
-    l = anp.expand_dims(l, axis=1)
-    g = -anp.sum(anp.power(f - l, 2), axis=1) + anp.power(r, 2)
+    l = jnp.mean(f, axis=1)
+    l = jnp.expand_dims(l, axis=1)
+    g = -jnp.sum(jnp.power(f - l, 2), axis=1) + jnp.power(r, 2)
     return g

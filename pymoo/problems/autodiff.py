@@ -1,7 +1,7 @@
 import warnings
 
 import autograd
-import autograd.numpy as anp
+import jax.numpy as jnp
 from autograd.core import VJPNode, vspace, backward_pass
 from autograd.tracer import new_box, isbox
 
@@ -36,7 +36,7 @@ def run_and_trace(fun, x, *args, **kwargs):
 def calc_jacobian_elem(start, end):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        b = anp.ones(start.shape)
+        b = jnp.ones(start.shape)
         n = new_box(b, 0, VJPNode.new_root())
         jac = backward_pass(n, end._node)
         return jac._value
@@ -52,13 +52,13 @@ def calc_jacobian(start, end):
 
     # the backward pass is done for each objective function once
     for j in range(end.shape[1]):
-        b = anp.zeros(end.shape)
+        b = jnp.zeros(end.shape)
         b[:, j] = 1
         n = new_box(b, 0, VJPNode.new_root())
         _jac = backward_pass(n, end._node)
         jac.append(_jac)
 
-    jac = anp.stack(jac, axis=1)
+    jac = jnp.stack(jac, axis=1)
 
     return jac
 
@@ -73,8 +73,8 @@ def autograd_elementwise_eval(problem, X, out, *args, **kwargs):
             val = out.get(key)
             if val is not None:
 
-                if not isinstance(val, anp.ndarray):
-                    val = anp.array([val])
+                if not isinstance(val, jnp.ndarray):
+                    val = jnp.array([val])
 
                 out["d" + key] = calc_jacobian_elem(out["__autograd__"], val)[None, :]
 

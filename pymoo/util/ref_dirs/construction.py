@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 import numpy as np
 from autograd import value_and_grad
 
@@ -9,7 +9,7 @@ from pymoo.util.reference_direction import ReferenceDirectionFactory, map_onto_u
 
 
 def calc_dist_to_others(x, X):
-    return - anp.sqrt(((x - X) ** 2).sum(axis=1)).min()
+    return - jnp.sqrt(((x - X) ** 2).sum(axis=1)).min()
 
 
 def calc_dist_to_others_with_gradient(x, X):

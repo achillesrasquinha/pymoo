@@ -1,13 +1,13 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.core.problem import Problem
 
 
 class Carside(Problem):
     def __init__(self):
-        super().__init__(n_var=7, n_obj=3, n_constr=10, type_var=anp.double)
-        self.xl = anp.array([0.5, 0.45, 0.5, 0.5, 0.875, 0.4, 0.4])
-        self.xu = anp.array([1.5, 1.35, 1.5, 1.5, 2.625, 1.2, 1.2])
+        super().__init__(n_var=7, n_obj=3, n_constr=10, type_var=jnp.double)
+        self.xl = jnp.array([0.5, 0.45, 0.5, 0.5, 0.875, 0.4, 0.4])
+        self.xu = jnp.array([1.5, 1.35, 1.5, 1.5, 2.625, 1.2, 1.2])
 
     def _evaluate(self, x, out, *args, **kwargs):
         g1 = 1.16 - 0.3717 * x[:,1] * x[:,3] - 0.0092928 * x[:,2]
@@ -36,5 +36,5 @@ class Carside(Problem):
         g9 = -1 + g9 / 9.9
         g10 = -1 + g10 / 15.7
 
-        out["F"] = anp.column_stack([f1, f2, f3])
-        out["G"] = anp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8, g9, g10])
+        out["F"] = jnp.column_stack([f1, f2, f3])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4, g5, g6, g7, g8, g9, g10])

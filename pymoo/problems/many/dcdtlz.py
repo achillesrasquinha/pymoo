@@ -1,25 +1,25 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.problems.many.dtlz import DTLZ1, DTLZ2, DTLZ3, DTLZ4
 
 
 def constraint_dc1(X, a=5, b=0.95):
-    G = b - anp.cos(a * anp.pi * X[:, 0])
+    G = b - jnp.cos(a * jnp.pi * X[:, 0])
     return G
 
 
 def constraints_dc2(gx, a=3, b=0.9):
-    G = anp.column_stack([
-        b - anp.cos(gx / 100 * anp.pi * a),
-        b - anp.exp (-gx / 100)
+    G = jnp.column_stack([
+        b - jnp.cos(gx / 100 * jnp.pi * a),
+        b - jnp.exp (-gx / 100)
     ])
     return G
 
 
 def constraints_dc3(X, gx, a=5, b=0.5):
-    Ggx = b - anp.cos(a * anp.pi * gx)
-    Gx = b - anp.cos(a * anp.pi * X)
-    return anp.column_stack([Ggx, Gx])
+    Ggx = b - jnp.cos(a * jnp.pi * gx)
+    Gx = b - jnp.cos(a * jnp.pi * X)
+    return jnp.column_stack([Ggx, Gx])
 
 
 class DC1DTLZ1(DTLZ1):

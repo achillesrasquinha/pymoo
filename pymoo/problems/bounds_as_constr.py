@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.problems.meta import MetaProblem
 
@@ -16,15 +16,15 @@ class BoundariesAsConstraints(MetaProblem):
         xl, xu = self.bounds()
 
         # add the boundary constraint if enabled
-        _G = anp.column_stack([xl-X, X-xu])
+        _G = jnp.column_stack([xl-X, X-xu])
 
-        out["G"] = anp.column_stack([out["G"], _G]) if out.get("G") is not None else _G
+        out["G"] = jnp.column_stack([out["G"], _G]) if out.get("G") is not None else _G
 
         if "dG" in out:
-            _dG = anp.zeros((len(X), 2 * self.n_var, self.n_var))
-            _dG[:, :self.n_var, :] = - anp.eye(self.n_var)
-            _dG[:, self.n_var:, :] = anp.eye(self.n_var)
-            out["dG"] = anp.column_stack([out["dG"], _dG]) if out.get("dG") is not None else _dG
+            _dG = jnp.zeros((len(X), 2 * self.n_var, self.n_var))
+            _dG[:, :self.n_var, :] = - jnp.eye(self.n_var)
+            _dG[:, self.n_var:, :] = jnp.eye(self.n_var)
+            out["dG"] = jnp.column_stack([out["dG"], _dG]) if out.get("dG") is not None else _dG
 
 
 

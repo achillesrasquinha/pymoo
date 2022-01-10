@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.core.problem import Problem
 from pymoo.util.reference_direction import UniformReferenceDirectionFactory
@@ -16,26 +16,26 @@ class DTLZ(Problem):
         else:
             raise Exception("Either provide number of variables or k!")
 
-        super().__init__(n_var=n_var, n_obj=n_obj, n_constr=0, xl=0, xu=1, type_var=anp.double)
+        super().__init__(n_var=n_var, n_obj=n_obj, n_constr=0, xl=0, xu=1, type_var=jnp.double)
 
     def g1(self, X_M):
-        return 100 * (self.k + anp.sum(anp.square(X_M - 0.5) - anp.cos(20 * anp.pi * (X_M - 0.5)), axis=1))
+        return 100 * (self.k + jnp.sum(jnp.square(X_M - 0.5) - jnp.cos(20 * jnp.pi * (X_M - 0.5)), axis=1))
 
     def g2(self, X_M):
-        return anp.sum(anp.square(X_M - 0.5), axis=1)
+        return jnp.sum(jnp.square(X_M - 0.5), axis=1)
 
     def obj_func(self, X_, g, alpha=1):
         f = []
 
         for i in range(0, self.n_obj):
             _f = (1 + g)
-            _f *= anp.prod(anp.cos(anp.power(X_[:, :X_.shape[1] - i], alpha) * anp.pi / 2.0), axis=1)
+            _f *= jnp.prod(jnp.cos(jnp.power(X_[:, :X_.shape[1] - i], alpha) * jnp.pi / 2.0), axis=1)
             if i > 0:
-                _f *= anp.sin(anp.power(X_[:, X_.shape[1] - i], alpha) * anp.pi / 2.0)
+                _f *= jnp.sin(jnp.power(X_[:, X_.shape[1] - i], alpha) * jnp.pi / 2.0)
 
             f.append(_f)
 
-        f = anp.column_stack(f)
+        f = jnp.column_stack(f)
         return f
 
 
@@ -53,12 +53,12 @@ class DTLZ1(DTLZ):
 
         for i in range(0, self.n_obj):
             _f = 0.5 * (1 + g)
-            _f *= anp.prod(X_[:, :X_.shape[1] - i], axis=1)
+            _f *= jnp.prod(X_[:, :X_.shape[1] - i], axis=1)
             if i > 0:
                 _f *= 1 - X_[:, X_.shape[1] - i]
             f.append(_f)
 
-        return anp.column_stack(f)
+        return jnp.column_stack(f)
 
     def _evaluate(self, x, out, *args, **kwargs):
         X_, X_M = x[:, :self.n_obj - 1], x[:, self.n_obj - 1:]
@@ -128,7 +128,7 @@ class DTLZ5(DTLZ):
         g = self.g2(X_M)
 
         theta = 1 / (2 * (1 + g[:, None])) * (1 + 2 * g[:, None] * X_)
-        theta = anp.column_stack([x[:, 0], theta[:, 1:]])
+        theta = jnp.column_stack([x[:, 0], theta[:, 1:]])
 
         out["F"] = self.obj_func(theta, g)
 
@@ -145,10 +145,10 @@ class DTLZ6(DTLZ):
 
     def _evaluate(self, x, out, *args, **kwargs):
         X_, X_M = x[:, :self.n_obj - 1], x[:, self.n_obj - 1:]
-        g = anp.sum(anp.power(X_M, 0.1), axis=1)
+        g = jnp.sum(jnp.power(X_M, 0.1), axis=1)
 
         theta = 1 / (2 * (1 + g[:, None])) * (1 + 2 * g[:, None] * X_)
-        theta = anp.column_stack([x[:, 0], theta[:, 1:]])
+        theta = jnp.column_stack([x[:, 0], theta[:, 1:]])
 
         out["F"] = self.obj_func(theta, g)
 
@@ -167,12 +167,12 @@ class DTLZ7(DTLZ):
         f = []
         for i in range(0, self.n_obj - 1):
             f.append(x[:, i])
-        f = anp.column_stack(f)
+        f = jnp.column_stack(f)
 
-        g = 1 + 9 / self.k * anp.sum(x[:, -self.k:], axis=1)
-        h = self.n_obj - anp.sum(f / (1 + g[:, None]) * (1 + anp.sin(3 * anp.pi * f)), axis=1)
+        g = 1 + 9 / self.k * jnp.sum(x[:, -self.k:], axis=1)
+        h = self.n_obj - jnp.sum(f / (1 + g[:, None]) * (1 + jnp.sin(3 * jnp.pi * f)), axis=1)
 
-        out["F"] = anp.column_stack([f, (1 + g) * h])
+        out["F"] = jnp.column_stack([f, (1 + g) * h])
 
 
 class InvertedDTLZ1(DTLZ1):
@@ -201,7 +201,7 @@ class ScaledProblem(Problem):
 
     @staticmethod
     def get_scale(n, scale_factor):
-        return anp.power(anp.full(n, scale_factor), anp.arange(n))
+        return jnp.power(jnp.full(n, scale_factor), jnp.arange(n))
 
     def _evaluate(self, X, out, *args, **kwargs):
         self.problem._evaluate(X, out, *args, **kwargs)
@@ -218,17 +218,17 @@ class ConvexProblem(Problem):
         self.problem = problem
 
     def get_power(self, n):
-        p = anp.full(n, 4.0)
+        p = jnp.full(n, 4.0)
         p[-1] = 2.0
         return p
 
     def _evaluate(self, X, out, *args, **kwargs):
         self.problem._evaluate(X, out, **kwargs)
-        out["F"] = anp.power(out["F"], self.get_power(self.n_obj))
+        out["F"] = jnp.power(out["F"], self.get_power(self.n_obj))
 
     def _calc_pareto_front(self, ref_dirs, *args, **kwargs):
         F = self.problem.pareto_front(ref_dirs)
-        return anp.power(F, self.get_power(self.n_obj))
+        return jnp.power(F, self.get_power(self.n_obj))
 
 
 class ScaledDTLZ1(ScaledProblem):
@@ -250,7 +250,7 @@ class ConvexDTLZ4(ConvexProblem):
 
 
 def generic_sphere(ref_dirs):
-    return ref_dirs / anp.tile(anp.linalg.norm(ref_dirs, axis=1)[:, None], (1, ref_dirs.shape[1]))
+    return ref_dirs / jnp.tile(jnp.linalg.norm(ref_dirs, axis=1)[:, None], (1, ref_dirs.shape[1]))
 
 
 def get_ref_dirs(n_obj):

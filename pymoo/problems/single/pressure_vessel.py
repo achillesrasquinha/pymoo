@@ -1,13 +1,13 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 
 from pymoo.core.problem import Problem
 
 
 class PressureVessel(Problem):
     def __init__(self):
-        super().__init__(n_var=4, n_obj=1, n_constr=4, type_var=anp.double)
-        self.xl = anp.array([1, 1, 10.0, 10.0])
-        self.xu = anp.array([99, 99, 200.0, 200.0])
+        super().__init__(n_var=4, n_obj=1, n_constr=4, type_var=jnp.double)
+        self.xl = jnp.array([1, 1, 10.0, 10.0])
+        self.xu = jnp.array([99, 99, 200.0, 200.0])
 
     def _evaluate(self, x, out, *args, **kwargs):
 
@@ -17,10 +17,10 @@ class PressureVessel(Problem):
 
         g1 = (-d1 + 0.0193*r)/3
         g2 = (-d2 + 0.00954*r)/3
-        g3 = (-anp.pi * r ** 2 * L - 4 * anp.pi / 3 * r ** 3 + 1296000) / 1296000
+        g3 = (-jnp.pi * r ** 2 * L - 4 * jnp.pi / 3 * r ** 3 + 1296000) / 1296000
         g4 = (L - 240)/240
 
-        out["G"] = anp.column_stack([g1, g2, g3, g4])
+        out["G"] = jnp.column_stack([g1, g2, g3, g4])
 
     def _calc_pareto_front(self):
         return 5.8853e+03

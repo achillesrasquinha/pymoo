@@ -1,6 +1,6 @@
 import unittest
 
-import autograd.numpy as anp
+import jax.numpy as jnp
 import numpy as np
 
 from pymoo.core.problem import Problem, ElementwiseProblem
@@ -21,7 +21,7 @@ class MyProblem(Problem):
         super().__init__(n_var=2, n_obj=1, **kwargs)
 
     def _evaluate(self, x, out, *args, **kwargs):
-        out["F"] = anp.sum(2 * x, axis=1)
+        out["F"] = jnp.sum(2 * x, axis=1)
 
 
 def test_elementwise_evaluation():

@@ -1,4 +1,4 @@
-import autograd.numpy as anp
+import jax.numpy as jnp
 import numpy as np
 
 from pymoo.core.problem import Problem
@@ -7,13 +7,13 @@ from pymoo.core.problem import Problem
 class Truss2D(Problem):
 
     def __init__(self):
-        super().__init__(n_var=3, n_obj=2, n_constr=1, type_var=anp.double)
+        super().__init__(n_var=3, n_obj=2, n_constr=1, type_var=jnp.double)
 
         self.Amax = 0.01
         self.Smax = 1e5
 
-        self.xl = anp.array([0.0, 0.0, 1.0])
-        self.xu = anp.array([self.Amax, self.Amax, 3.0])
+        self.xl = jnp.array([0.0, 0.0, 1.0])
+        self.xu = jnp.array([self.Amax, self.Amax, 3.0])
 
     def _evaluate(self, x, out, *args, **kwargs):
 
@@ -23,19 +23,19 @@ class Truss2D(Problem):
         y = x[:, 2]
 
         # first objectives
-        f1 = x1 * anp.sqrt(16 + anp.square(y)) + x2 * anp.sqrt((1 + anp.square(y)))
+        f1 = x1 * jnp.sqrt(16 + jnp.square(y)) + x2 * jnp.sqrt((1 + jnp.square(y)))
 
         # measure which are needed for the second objective
-        sigma_ac = 20 * anp.sqrt(16 + anp.square(y)) / (y * x1)
-        sigma_bc = 80 * anp.sqrt(1 + anp.square(y)) / (y * x2)
+        sigma_ac = 20 * jnp.sqrt(16 + jnp.square(y)) / (y * x1)
+        sigma_bc = 80 * jnp.sqrt(1 + jnp.square(y)) / (y * x2)
 
         # take the max
-        f2 = anp.max(anp.column_stack((sigma_ac, sigma_bc)), axis=1)
+        f2 = jnp.max(jnp.column_stack((sigma_ac, sigma_bc)), axis=1)
 
         # define a constraint
         g1 = f2 - self.Smax
 
-        out["F"] = anp.column_stack([f1, f2])
+        out["F"] = jnp.column_stack([f1, f2])
         out["G"] = g1
 
     def _calc_pareto_front(self, *args, **kwargs):
