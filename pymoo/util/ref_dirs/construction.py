@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 import numpy as np
-from autograd import value_and_grad
+from jax import value_and_grad
 
 from pymoo.util.misc import vectorized_cdist
 from pymoo.util.ref_dirs.misc import project_onto_sum_equals_zero_plane, project_onto_unit_simplex_recursive

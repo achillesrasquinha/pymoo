@@ -1,9 +1,9 @@
 import warnings
 
-import autograd
+import jax
 import jax.numpy as jnp
-from autograd.core import VJPNode, vspace, backward_pass
-from autograd.tracer import new_box, isbox
+from jax.core import VJPNode, vspace, backward_pass
+from jax.tracer import new_box, isbox
 
 from pymoo.core.problem import ElementwiseProblem, out_to_ndarray, check
 from pymoo.problems.meta import MetaProblem
@@ -11,7 +11,7 @@ from pymoo.problems.meta import MetaProblem
 
 def out_to_numpy(out):
     for key in out.keys():
-        if type(out[key]) == autograd.numpy.numpy_boxes.ArrayBox:
+        if type(out[key]) == jax.numpy.numpy_boxes.ArrayBox:
             out[key] = out[key]._value
 
 
@@ -43,7 +43,7 @@ def calc_jacobian_elem(start, end):
 
 
 def calc_jacobian(start, end):
-    # if the end_box is not a box - autograd can not track back
+    # if the end_box is not a box - jax can not track back
     if not isbox(end):
         return vspace(start.shape).zeros()
 
@@ -63,11 +63,11 @@ def calc_jacobian(start, end):
     return jac
 
 
-def autograd_elementwise_eval(problem, X, out, *args, **kwargs):
+def jax_elementwise_eval(problem, X, out, *args, **kwargs):
     deriv = get_deriv(out)
 
     if len(deriv) > 0:
-        out["__autograd__"], _ = run_and_trace(problem._evaluate, X, out, *args, **kwargs)
+        out["__jax__"], _ = run_and_trace(problem._evaluate, X, out, *args, **kwargs)
 
         for key in deriv:
             val = out.get(key)
@@ -76,7 +76,7 @@ def autograd_elementwise_eval(problem, X, out, *args, **kwargs):
                 if not isinstance(val, jnp.ndarray):
                     val = jnp.array([val])
 
-                out["d" + key] = calc_jacobian_elem(out["__autograd__"], val)[None, :]
+                out["d" + key] = calc_jacobian_elem(out["__jax__"], val)[None, :]
 
         # make sure all results are pure numpy arrays
         out_to_numpy(out)

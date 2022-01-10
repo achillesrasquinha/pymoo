@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 import numpy as np
-from autograd import value_and_grad
+from jax import value_and_grad
 
 from pymoo.factory import normalize
 from pymoo.util.ref_dirs.energy import squared_dist
