@@ -102,7 +102,7 @@ class AutomaticDifferentiation(MetaProblem):
             func = problem.func_elementwise_eval
 
             # set a new elementwise function, do the evaluation and revert to default
-            problem.func_elementwise_eval = autograd_elementwise_eval
+            problem.func_elementwise_eval = jax_elementwise_eval
             problem.do(X, out, *args, **kwargs)
 
             # revert to the old function evaluation
@@ -112,7 +112,7 @@ class AutomaticDifferentiation(MetaProblem):
             deriv = get_deriv(out)
 
             if len(deriv) > 0:
-                out["__autograd__"], _ = run_and_trace(self.problem.do, X, out, *args, **kwargs)
+                out["__jax__"], _ = run_and_trace(self.problem.do, X, out, *args, **kwargs)
 
                 for key in deriv:
                     val = out.get(key)
@@ -122,7 +122,7 @@ class AutomaticDifferentiation(MetaProblem):
                         if val.ndim == 1:
                             val = val[:, None]
 
-                        jac = calc_jacobian(out["__autograd__"], val)
+                        jac = calc_jacobian(out["__jax__"], val)
                         out["d" + key] = jac
 
                 # make sure all results are pure numpy arrays

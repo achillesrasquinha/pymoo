@@ -105,7 +105,7 @@ class MySphere(Problem):
 class SphereWithGradientAndConstraint(Problem):
 
     def __init__(self):
-        super().__init__(n_var=2, n_obj=1, n_constr=1, xl=-1, xu=+1, elementwise_evaluation=True, autograd=False)
+        super().__init__(n_var=2, n_obj=1, n_constr=1, xl=-1, xu=+1, elementwise_evaluation=True, jax=False)
 
     def _evaluate(self, x, out, *args, **kwargs):
         out["F"] = (x ** 2).sum()
